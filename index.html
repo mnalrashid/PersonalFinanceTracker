@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b6bcb">
+  <title>Personal Finance &amp; Tracker</title>
+  <style>
+    :root {
+      --primary: #0b6bcb;
+      --primary-dark: #07529e;
+      --primary-soft: #eaf4ff;
+      --success: #168a55;
+      --success-dark: #0f6d42;
+      --danger: #c9343c;
+      --danger-soft: #fff0f1;
+      --warning: #f2b705;
+      --ink: #17212b;
+      --muted: #647382;
+      --line: #dfe7ef;
+      --surface: #ffffff;
+      --background: #f3f7fb;
+      --shadow: 0 10px 30px rgba(31, 52, 73, 0.09);
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(11, 107, 203, 0.10), transparent 32rem),
+        var(--background);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    body.modal-open {
+      overflow: hidden;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app-shell {
+      width: min(100%, 740px);
+      margin: 0 auto;
+      padding: calc(16px + env(safe-area-inset-top)) 14px calc(28px + env(safe-area-inset-bottom));
+    }
+
+    .card {
+      margin-bottom: 14px;
+      padding: 18px;
+      background: var(--surface);
+      border: 1px solid rgba(213, 224, 235, 0.85);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .app-header {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app-header::after {
+      position: absolute;
+      right: -64px;
+      bottom: -82px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: rgba(11, 107, 203, 0.07);
+      content: "";
+      pointer-events: none;
+    }
+
+    .brand {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .brand-mark {
+      display: grid;
+      flex: 0 0 44px;
+      width: 44px;
+      height: 44px;
+      place-items: center;
+      border-radius: 13px;
+      background: linear-gradient(145deg, var(--primary), #3a8ee6);
+      color: #fff;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      box-shadow: 0 8px 20px rgba(11, 107, 203, 0.24);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1.23rem;
+      line-height: 1.15;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .field-label {
+      display: block;
+      margin: 0 0 6px;
+      color: #354454;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    select,
+    input {
+      width: 100%;
+      min-height: 46px;
+      margin: 0;
+      padding: 11px 12px;
+      border: 1px solid #cbd8e4;
+      border-radius: 11px;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    select:focus,
+    input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(11, 107, 203, 0.12);
+    }
+
+    #accountSelect {
+      position: relative;
+      z-index: 1;
+      border: 2px solid var(--primary);
+      background: var(--primary-soft);
+      font-weight: 700;
+    }
+
+    optgroup {
+      color: var(--primary-dark);
+      font-weight: 800;
+    }
+
+    option {
+      color: var(--ink);
+      background: #fff;
+      font-weight: 500;
+    }
+
+    .btn {
+      width: 100%;
+      min-height: 46px;
+      margin: 8px 0 0;
+      padding: 11px 14px;
+      border: 0;
+      border-radius: 11px;
+      color: #fff;
+      font-weight: 750;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform 120ms ease, background-color 160ms ease, opacity 160ms ease;
+    }
+
+    .btn:active:not(:disabled) {
+      transform: translateY(1px) scale(0.995);
+    }
+
+    .btn:disabled {
+      cursor: wait;
+      opacity: 0.65;
+    }
+
+    .btn-primary {
+      position: relative;
+      z-index: 1;
+      background: var(--primary);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-success {
+      background: var(--success);
+    }
+
+    .btn-success:hover {
+      background: var(--success-dark);
+    }
+
+    .btn-secondary {
+      background: #667685;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+    }
+
+    .btn-quiet {
+      border: 1px solid #bfd0e1;
+      background: #f7fafc;
+      color: #33475a;
+    }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .button-grid .btn {
+      margin-top: 0;
+    }
+
+    .section-title {
+      margin: 0 0 12px;
+      font-size: 1.04rem;
+    }
+
+    .section-subtitle {
+      margin: -5px 0 12px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .balance-card {
+      overflow: hidden;
+      background: linear-gradient(145deg, #0b6bcb, #084f96);
+      color: #fff;
+      text-align: center;
+    }
+
+    .balance-label {
+      display: block;
+      margin-bottom: 4px;
+      color: rgba(255, 255, 255, 0.80);
+      font-size: 0.84rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    #displayBalance {
+      margin: 0;
+      color: #fff;
+      font-size: clamp(2rem, 9vw, 3.1rem);
+      line-height: 1.1;
+      letter-spacing: -0.04em;
+    }
+
+    #displayBalance.negative-balance {
+      color: #ffd5d7;
+    }
+
+    .action-form {
+      margin-top: 2px;
+    }
+
+    .amount-line {
+      display: grid;
+      grid-template-columns: minmax(96px, 0.8fr) minmax(0, 1.4fr);
+      gap: 9px;
+      margin-bottom: 9px;
+    }
+
+    .action-chip {
+      display: grid;
+      min-height: 46px;
+      place-items: center;
+      border-radius: 11px;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .amount-input {
+      position: relative;
+    }
+
+    .amount-input span {
+      position: absolute;
+      top: 50%;
+      left: 13px;
+      z-index: 1;
+      transform: translateY(-50%);
+      color: #415468;
+      font-weight: 800;
+    }
+
+    .amount-input input {
+      padding-left: 32px;
+    }
+
+    .table-card {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .table-heading {
+      padding: 17px 18px 0;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      min-width: 520px;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+    }
+
+    .compact-table {
+      min-width: 360px;
+    }
+
+    th,
+    td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #f6f9fc;
+      color: #45576a;
+      font-size: 0.76rem;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .currency {
+      color: var(--success);
+      font-weight: 750;
+    }
+
+    .spend,
+    .negative-balance {
+      color: var(--danger);
+      font-weight: 750;
+    }
+
+    .clickable-row {
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+      transition: background-color 140ms ease, opacity 140ms ease;
+    }
+
+    .clickable-row:hover,
+    .clickable-row:focus {
+      background: #f1f7fd;
+      outline: none;
+    }
+
+    .clickable-row.is-saving {
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .empty-row td {
+      padding: 22px 12px;
+      color: var(--muted);
+      text-align: center;
+      white-space: normal;
+    }
+
+    .history-actions {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 54px;
+      gap: 9px;
+    }
+
+    .history-actions .btn {
+      margin-top: 0;
+    }
+
+    .calendar-btn {
+      padding: 0;
+      font-size: 1.2rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .toast {
+      position: fixed;
+      top: calc(12px + env(safe-area-inset-top));
+      left: 50%;
+      z-index: 3000;
+      display: flex;
+      width: min(calc(100% - 28px), 440px);
+      min-height: 50px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px 10px 15px;
+      transform: translateX(-50%);
+      border-radius: 13px;
+      background: #17212b;
+      color: #fff;
+      box-shadow: 0 14px 36px rgba(15, 28, 40, 0.28);
+    }
+
+    .toast-message {
+      min-width: 0;
+      overflow: hidden;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .toast-undo {
+      flex: 0 0 auto;
+      min-height: 34px;
+      margin: 0;
+      padding: 6px 12px;
+      border: 0;
+      border-radius: 9px;
+      background: var(--warning);
+      color: #2d2600;
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      display: grid;
+      padding: calc(18px + env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom));
+      place-items: center;
+      background: rgba(11, 22, 33, 0.58);
+      backdrop-filter: blur(3px);
+    }
+
+    .modal-panel {
+      width: min(100%, 480px);
+      max-height: 88dvh;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: 0 28px 70px rgba(4, 15, 25, 0.34);
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .modal-body h2,
+    .modal-body h3 {
+      margin: 0 0 16px;
+    }
+
+    .form-row {
+      margin-bottom: 13px;
+    }
+
+    .modal-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+      margin-top: 4px;
+    }
+
+    .modal-actions .btn {
+      margin-top: 0;
+    }
+
+    .modal-actions.stack {
+      grid-template-columns: 1fr;
+    }
+
+    .shopping-input-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 86px;
+      gap: 8px;
+      margin-bottom: 9px;
+    }
+
+    .sticky-modal-header {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.97);
+      backdrop-filter: blur(8px);
+    }
+
+    .sticky-modal-header h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .close-btn {
+      display: grid;
+      flex: 0 0 36px;
+      width: 36px;
+      height: 36px;
+      place-items: center;
+      border: 0;
+      border-radius: 50%;
+      background: var(--danger-soft);
+      color: var(--danger);
+      font-size: 1.1rem;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .history-content {
+      padding: 0 0 8px;
+    }
+
+    .history-content table {
+      min-width: 390px;
+    }
+
+    .loading-state {
+      display: grid;
+      min-height: 130px;
+      place-items: center;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      margin: 0 auto 10px;
+      border: 3px solid #dce9f5;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 800ms linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 15px;
+        border-radius: 14px;
+      }
+
+      .table-heading {
+        padding: 15px 15px 0;
+      }
+
+      .amount-line {
+        grid-template-columns: 102px minmax(0, 1fr);
+      }
+
+      .modal-actions {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <section class="card app-header">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">FT</div>
+        <div>
+          <h1>Personal Finance &amp; Tracker</h1>
+          <p>Accounts, expenses, and the grocery list in one place.</p>
+        </div>
+      </div>
+
+      <label class="field-label" for="accountSelect">Choose a section</label>
+      <select id="accountSelect">
+        <optgroup label="SPENDING &amp; TRACKERS">
+          <option value="Groceries" selected>&#128722; Groceries</option>
+          <option value="Upcoming Expenses">&#128197; Upcoming Expenses</option>
+        </optgroup>
+        <optgroup label="ACCOUNTS &amp; CARDS">
+          <option value="AIB">&#127974; AIB</option>
+          <option value="BOI">&#127974; BOI</option>
+          <option value="BOI Credit">&#128179; BOI Credit</option>
+          <option value="BOI Saving">&#129689; BOI Saving</option>
+          <option value="AnPost Credit">&#128179; AnPost Credit</option>
+        </optgroup>
+      </select>
+      <button id="checkBtn" class="btn btn-primary" type="button">Check</button>
+    </section>
+
+    <div id="appContent" class="hidden">
+      <section id="accountSection" class="hidden">
+        <div class="card balance-card">
+          <span class="balance-label">Current balance</span>
+          <h2 id="displayBalance">&euro;0.00</h2>
+        </div>
+
+        <div class="card">
+          <div id="buttonState" class="button-grid">
+            <button id="topUpBtn" class="btn btn-primary" type="button">Top-Up</button>
+            <button id="spendBtn" class="btn btn-danger" type="button">Spend</button>
+          </div>
+
+          <div id="formState" class="action-form hidden">
+            <div class="amount-line">
+              <div id="activeActionLabel" class="action-chip">Action</div>
+              <div class="amount-input">
+                <span aria-hidden="true">&euro;</span>
+                <input id="amountInput" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Amount">
+              </div>
+            </div>
+            <div class="form-row">
+              <label class="field-label" for="detailInput">Details</label>
+              <input id="detailInput" type="text" autocomplete="off" placeholder="e.g. Groceries, salary">
+            </div>
+            <div class="button-grid">
+              <button id="saveTransactionBtn" class="btn btn-success" type="button">Done</button>
+              <button id="cancelTransactionBtn" class="btn btn-secondary" type="button">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card table-card">
+          <div class="table-heading">
+            <h3 class="section-title">Recent Transactions</h3>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Details</th>
+                  <th>Top-Up</th>
+                  <th>Spend</th>
+                  <th>Balance</th>
+                </tr>
+              </thead>
+              <tbody id="transactionBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="billsSection" class="hidden">
+        <div class="card">
+          <button id="openAddExpenseBtn" class="btn btn-success" type="button">Add Expenses</button>
+        </div>
+
+        <div class="card table-card">
+          <div class="table-heading">
+            <h3 class="section-title">Pending Expenses</h3>
+            <p class="section-subtitle">Double tap an expense to mark it as paid.</p>
+          </div>
+          <div class="table-wrap">
+            <table class="compact-table">
+              <thead>
+                <tr>
+                  <th>What</th>
+                  <th>By When</th>
+                  <th>Cost</th>
+                </tr>
+              </thead>
+              <tbody id="pendingBillsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card table-card">
+          <div class="table-heading">
+            <h3 class="section-title">Paid Expenses</h3>
+            <p class="section-subtitle">The last six months, newest first.</p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>What</th>
+                  <th>Date Paid</th>
+                  <th>Cost</th>
+                  <th>How</th>
+                </tr>
+              </thead>
+              <tbody id="paidBillsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="shoppingSection" class="hidden">
+        <div class="card">
+          <button id="openGroceryBtn" class="btn btn-success" type="button">Add Item</button>
+        </div>
+
+        <div class="card table-card">
+          <div class="table-heading">
+            <h3 class="section-title">Pending Grocery Items</h3>
+            <p class="section-subtitle">Double tap an item after it has been bought.</p>
+          </div>
+          <div class="table-wrap">
+            <table class="compact-table">
+              <thead>
+                <tr>
+                  <th>Qty</th>
+                  <th>Item</th>
+                </tr>
+              </thead>
+              <tbody id="shoppingBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="history-actions">
+            <button id="history30Btn" class="btn btn-secondary" type="button">Grocery History</button>
+            <button id="historyCalendarBtn" class="btn btn-secondary calendar-btn" type="button" aria-label="Choose grocery history date range">&#128197;</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div id="toastNotification" class="toast hidden" role="status" aria-live="polite">
+    <span id="toastMessage" class="toast-message">Bought item</span>
+    <button id="undoBuyBtn" class="toast-undo" type="button">Undo</button>
+  </div>
+
+  <div id="addBillModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-panel">
+      <div class="modal-body">
+        <h2>Add Upcoming Expense</h2>
+        <div class="form-row">
+          <label class="field-label" for="billWhat">What</label>
+          <input id="billWhat" type="text" autocomplete="off" placeholder="e.g. Electricity">
+        </div>
+        <div class="form-row">
+          <label class="field-label" for="billDate">By When</label>
+          <input id="billDate" type="date">
+        </div>
+        <div class="form-row">
+          <label class="field-label" for="billCost">Estimated Cost (&euro;)</label>
+          <input id="billCost" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00">
+        </div>
+        <div class="modal-actions">
+          <button id="saveExpenseBtn" class="btn btn-success" type="button">Save Expense</button>
+          <button class="btn btn-secondary" type="button" data-close-modal>Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="payBillModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-panel">
+      <div class="modal-body">
+        <h2>Mark Expense as Paid</h2>
+        <p id="payBillWhat" class="section-subtitle"></p>
+        <div class="form-row">
+          <label class="field-label" for="payHow">Paid From</label>
+          <select id="payHow">
+            <option value="AIB">AIB</option>
+            <option value="BOI">BOI</option>
+            <option value="BOI Credit">BOI Credit</option>
+            <option value="BOI Saving">BOI Saving</option>
+            <option value="AnPost Credit">AnPost Credit</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div id="payCustomHowRow" class="form-row hidden">
+          <label class="field-label" for="payCustomHow">Other Payment Details</label>
+          <input id="payCustomHow" type="text" autocomplete="off" placeholder="Specify payment method">
+        </div>
+        <div class="form-row">
+          <label class="field-label" for="payExactAmount">Exact Amount Paid (&euro;)</label>
+          <input id="payExactAmount" type="number" min="0.01" step="0.01" inputmode="decimal">
+        </div>
+        <div class="modal-actions">
+          <button id="confirmPaidBtn" class="btn btn-success" type="button">Confirm Paid</button>
+          <button class="btn btn-secondary" type="button" data-close-modal>Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="shoppingModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-panel">
+      <div class="modal-body">
+        <h2>Add Grocery Items</h2>
+        <div id="shoppingInputList"></div>
+        <div class="modal-actions stack">
+          <button id="addMoreGroceryBtn" class="btn btn-quiet" type="button">+ More</button>
+          <button id="saveGroceriesBtn" class="btn btn-success" type="button">Add</button>
+          <button class="btn btn-secondary" type="button" data-close-modal>Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="historyDateModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-panel">
+      <div class="modal-body">
+        <h2>Select Date Range</h2>
+        <div class="form-row">
+          <label class="field-label" for="histStartDate">From Date</label>
+          <input id="histStartDate" type="date">
+        </div>
+        <div class="form-row">
+          <label class="field-label" for="histEndDate">To Date</label>
+          <input id="histEndDate" type="date">
+        </div>
+        <div class="modal-actions">
+          <button id="showCustomHistoryBtn" class="btn btn-success" type="button">Show History</button>
+          <button class="btn btn-secondary" type="button" data-close-modal>Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="historyDisplayModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-panel">
+      <div class="sticky-modal-header">
+        <h3 id="historyTitle">Grocery History</h3>
+        <button id="closeHistoryBtn" class="close-btn" type="button" aria-label="Close grocery history">&times;</button>
+      </div>
+      <div id="historyListContainer" class="history-content"></div>
+    </div>
+  </div>
+
+  <script>
+    "use strict";
+
+    // Replace this with the deployed Google Apps Script Web App URL ending in /exec.
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxe4Sr8OZ3w2xnstEj5L7tf1bXp4q-xXQvE1mPSQFAXSOqIrBC0fmTDVQfxqDkkNBpC/exec";
+
+    const state = {
+      currentActionType: "",
+      selectedBill: null,
+      toastTimer: null,
+      lastBought: null
+    };
+
+    const euroFormatter = new Intl.NumberFormat("en-IE", {
+      style: "currency",
+      currency: "EUR",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    function byId(id) {
+      return document.getElementById(id);
+    }
+
+    function assertWebAppUrl() {
+      const valid = /^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec\/?(?:\?.*)?$/.test(WEB_APP_URL);
+      if (!valid) {
+        throw new Error("Paste your deployed Google Apps Script /exec URL into WEB_APP_URL in index.html first.");
+      }
+    }
+
+    function setButtonBusy(button, busy, busyLabel) {
+      if (!button) return;
+
+      if (busy) {
+        if (!button.dataset.normalLabel) {
+          button.dataset.normalLabel = button.textContent;
+        }
+        button.disabled = true;
+        button.textContent = busyLabel || "Working...";
+      } else {
+        button.disabled = false;
+        button.textContent = button.dataset.normalLabel || button.textContent;
+      }
+    }
+
+    async function requestJson(url, options) {
+      const response = await fetch(url, Object.assign({
+        redirect: "follow",
+        cache: "no-store"
+      }, options || {}));
+
+      const text = await response.text();
+      let data;
+
+      try {
+        data = JSON.parse(text.replace(/^\uFEFF/, ""));
+      } catch (error) {
+        const preview = text.replace(/\s+/g, " ").slice(0, 160);
+        throw new Error("The Apps Script response was not JSON. Check the deployment and /exec URL. Response: " + preview);
+      }
+
+      if (!response.ok) {
+        throw new Error("Request failed with HTTP " + response.status + ".");
+      }
+
+      if (data && data.error) {
+        throw new Error(data.error);
+      }
+
+      return data;
+    }
+
+    async function apiGet(params) {
+      assertWebAppUrl();
+
+      const url = new URL(WEB_APP_URL);
+      Object.keys(params || {}).forEach(function(key) {
+        if (params[key] !== null && params[key] !== undefined && params[key] !== "") {
+          url.searchParams.set(key, String(params[key]));
+        }
+      });
+
+      return requestJson(url.toString());
+    }
+
+    async function sendPost(payload) {
+      assertWebAppUrl();
+
+      return requestJson(WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+    }
+
+    function localDateKey(date) {
+      return date.getFullYear() + "-" + pad2(date.getMonth() + 1) + "-" + pad2(date.getDate());
+    }
+
+    function shiftDateKey(dateKey, dayOffset) {
+      const parts = String(dateKey).split("-").map(Number);
+      const date = new Date(parts[0], parts[1] - 1, parts[2]);
+      date.setDate(date.getDate() + Number(dayOffset || 0));
+      return localDateKey(date);
+    }
+
+    function pad2(value) {
+      return Number(value) < 10 ? "0" + Number(value) : String(Number(value));
+    }
+
+    function formatOrdinalDate(dateInput) {
+      if (!dateInput) return "";
+
+      const match = String(dateInput).match(/^(\d{4})-(\d{2})-(\d{2})/);
+      let date;
+
+      if (match) {
+        date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+      } else {
+        date = new Date(dateInput);
+      }
+
+      if (Number.isNaN(date.getTime())) {
+        return String(dateInput);
+      }
+
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const day = date.getDate();
+      let suffix = "th";
+
+      if (day < 11 || day > 13) {
+        if (day % 10 === 1) suffix = "st";
+        if (day % 10 === 2) suffix = "nd";
+        if (day % 10 === 3) suffix = "rd";
+      }
+
+      return day + suffix + " " + months[date.getMonth()] + " " + String(date.getFullYear()).slice(-2);
+    }
+
+    function numberFromMoney(value) {
+      if (typeof value === "number") return value;
+      const cleaned = String(value || "").replace(/[^0-9,.-]/g, "").replace(/,/g, "");
+      const number = Number(cleaned);
+      return Number.isFinite(number) ? number : NaN;
+    }
+
+    function formatMoney(value) {
+      if (value === null || value === undefined || value === "") return "";
+
+      const text = String(value).trim();
+      if (text.indexOf("\u20AC") !== -1) return text;
+
+      const number = numberFromMoney(value);
+      return Number.isFinite(number) ? euroFormatter.format(number) : "\u20AC" + text;
+    }
+
+    function isNegativeMoney(value) {
+      const number = numberFromMoney(value);
+      return Number.isFinite(number) ? number < 0 : String(value || "").indexOf("-") !== -1;
+    }
+
+    function clearTableBody(body) {
+      while (body.firstChild) body.removeChild(body.firstChild);
+    }
+
+    function appendCell(row, text, className) {
+      const cell = document.createElement("td");
+      cell.textContent = text === null || text === undefined ? "" : String(text);
+      if (className) cell.className = className;
+      row.appendChild(cell);
+      return cell;
+    }
+
+    function appendEmptyRow(body, columnCount, message) {
+      const row = document.createElement("tr");
+      row.className = "empty-row";
+      const cell = document.createElement("td");
+      cell.colSpan = columnCount;
+      cell.textContent = message;
+      row.appendChild(cell);
+      body.appendChild(row);
+    }
+
+    function attachDoubleTap(element, handler) {
+      let lastTap = 0;
+      let running = false;
+
+      element.tabIndex = 0;
+      element.setAttribute("role", "button");
+
+      async function runHandler() {
+        if (running) return;
+        running = true;
+        try {
+          await handler();
+        } finally {
+          window.setTimeout(function() {
+            running = false;
+          }, 500);
+        }
+      }
+
+      element.addEventListener("click", function() {
+        const now = Date.now();
+        if (now - lastTap > 0 && now - lastTap < 500) {
+          lastTap = 0;
+          runHandler();
+        } else {
+          lastTap = now;
+        }
+      });
+
+      element.addEventListener("keydown", function(event) {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          runHandler();
+        }
+      });
+    }
+
+    function showOnlySection(sectionId) {
+      ["accountSection", "billsSection", "shoppingSection"].forEach(function(id) {
+        byId(id).classList.toggle("hidden", id !== sectionId);
+      });
+    }
+
+    function resetView() {
+      byId("appContent").classList.add("hidden");
+      showOnlySection("");
+      cancelAction();
+      closeModals();
+      hideUndoToast(true);
+      byId("checkBtn").textContent = "Check";
+    }
+
+    async function loadData() {
+      const button = byId("checkBtn");
+      const tab = byId("accountSelect").value;
+      setButtonBusy(button, true, "Loading...");
+
+      try {
+        const data = await apiGet({ tab: tab, _: Date.now() });
+        byId("appContent").classList.remove("hidden");
+
+        if (tab === "Groceries") {
+          showOnlySection("shoppingSection");
+          renderShoppingUI(data);
+        } else if (tab === "Upcoming Expenses") {
+          showOnlySection("billsSection");
+          renderBillsUI(data);
+        } else {
+          showOnlySection("accountSection");
+          renderAccountUI(data);
+        }
+      } catch (error) {
+        alert(error.message || String(error));
+      } finally {
+        setButtonBusy(button, false);
+      }
+    }
+
+    function renderAccountUI(data) {
+      const balance = formatMoney(data && data.balance !== undefined ? data.balance : 0) || euroFormatter.format(0);
+      const display = byId("displayBalance");
+      display.textContent = balance;
+      display.classList.toggle("negative-balance", isNegativeMoney(balance));
+
+      const body = byId("transactionBody");
+      clearTableBody(body);
+      const transactions = data && Array.isArray(data.transactions) ? data.transactions : [];
+
+      if (transactions.length === 0) {
+        appendEmptyRow(body, 5, "No transactions yet.");
+        return;
+      }
+
+      transactions.forEach(function(item) {
+        const row = document.createElement("tr");
+        appendCell(row, item[0]);
+        appendCell(row, item[1]);
+        appendCell(row, item[2] ? formatMoney(item[2]) : "", "currency");
+        appendCell(row, item[3] ? formatMoney(item[3]) : "", "spend");
+        const rowBalance = item[4] ? formatMoney(item[4]) : "";
+        appendCell(row, rowBalance, isNegativeMoney(rowBalance) ? "negative-balance" : "");
+        body.appendChild(row);
+      });
+    }
+
+    function activateForm(type) {
+      state.currentActionType = type;
+      byId("buttonState").classList.add("hidden");
+      byId("formState").classList.remove("hidden");
+      byId("activeActionLabel").textContent = type;
+      byId("activeActionLabel").style.backgroundColor = type === "Spend" ? "#c9343c" : "#0b6bcb";
+      window.setTimeout(function() { byId("amountInput").focus(); }, 60);
+    }
+
+    function cancelAction() {
+      state.currentActionType = "";
+      byId("amountInput").value = "";
+      byId("detailInput").value = "";
+      byId("buttonState").classList.remove("hidden");
+      byId("formState").classList.add("hidden");
+    }
+
+    async function submitTransaction() {
+      const button = byId("saveTransactionBtn");
+      const amount = Number(byId("amountInput").value);
+      const detail = byId("detailInput").value.trim();
+      const tab = byId("accountSelect").value;
+
+      if (!state.currentActionType) {
+        alert("Choose Top-Up or Spend first.");
+        return;
+      }
+
+      if (!Number.isFinite(amount) || amount <= 0) {
+        alert("Enter a valid amount.");
+        byId("amountInput").focus();
+        return;
+      }
+
+      setButtonBusy(button, true, "Saving...");
+
+      try {
+        const data = await sendPost({
+          action: "addTransaction",
+          tab: tab,
+          type: state.currentActionType,
+          amount: amount,
+          detail: detail
+        });
+        renderAccountUI(data);
+        cancelAction();
+      } catch (error) {
+        alert(error.message || String(error));
+      } finally {
+        setButtonBusy(button, false);
+      }
+    }
+
+    function renderBillsUI(data) {
+      const pendingBody = byId("pendingBillsBody");
+      const paidBody = byId("paidBillsBody");
+      clearTableBody(pendingBody);
+      clearTableBody(paidBody);
+
+      const pending = data && Array.isArray(data.pendingBills) ? data.pendingBills : [];
+      const paid = data && Array.isArray(data.paidBills) ? data.paidBills : [];
+
+      if (pending.length === 0) {
+        appendEmptyRow(pendingBody, 3, "No pending expenses.");
+      } else {
+        pending.forEach(function(item) {
+          const row = document.createElement("tr");
+          row.className = "clickable-row";
+          appendCell(row, item[1]);
+          appendCell(row, item[2]);
+          appendCell(row, formatMoney(item[3]), "spend");
+          attachDoubleTap(row, function() {
+            openPayBillModal({
+              rowIndex: Number(item[0]),
+              what: String(item[1] || ""),
+              cost: item[3]
+            });
+          });
+          pendingBody.appendChild(row);
+        });
+      }
+
+      if (paid.length === 0) {
+        appendEmptyRow(paidBody, 4, "No paid expenses in the last six months.");
+      } else {
+        paid.forEach(function(item) {
+          const row = document.createElement("tr");
+          appendCell(row, item[0]);
+          appendCell(row, item[1]);
+          appendCell(row, formatMoney(item[2]), "spend");
+          appendCell(row, item[3]);
+          paidBody.appendChild(row);
+        });
+      }
+    }
+
+    function openAddBillModal() {
+      byId("billWhat").value = "";
+      byId("billCost").value = "";
+      byId("billDate").value = localDateKey(new Date());
+      openModal("addBillModal");
+      window.setTimeout(function() { byId("billWhat").focus(); }, 60);
+    }
+
+    async function submitAddBill() {
+      const button = byId("saveExpenseBtn");
+      const what = byId("billWhat").value.trim();
+      const byWhen = byId("billDate").value;
+      const cost = Number(byId("billCost").value);
+
+      if (!what || !byWhen || !Number.isFinite(cost) || cost <= 0) {
+        alert("Complete the expense name, date, and estimated cost.");
+        return;
+      }
+
+      setButtonBusy(button, true, "Saving...");
+
+      try {
+        const data = await sendPost({
+          action: "addBill",
+          what: what,
+          byWhen: byWhen,
+          cost: cost
+        });
+        closeModals();
+        renderBillsUI(data);
+      } catch (error) {
+        alert(error.message || String(error));
+      } finally {
+        setButtonBusy(button, false);
+      }
+    }
+
+    function openPayBillModal(bill) {
+      state.selectedBill = bill;
+      byId("payBillWhat").textContent = bill.what;
+      byId("payHow").value = "AIB";
+      byId("payCustomHow").value = "";
+      byId("payCustomHowRow").classList.add("hidden");
+      const costNumber = numberFromMoney(bill.cost);
+      byId("payExactAmount").value = Number.isFinite(costNumber) ? costNumber : "";
+      openModal("payBillModal");
+      window.setTimeout(function() {
+        byId("payExactAmount").focus();
+        byId("payExactAmount").select();
+      }, 60);
+    }
+
+    function toggleCustomHow() {
+      const isOther = byId("payHow").value === "Other";
+      byId("payCustomHowRow").classList.toggle("hidden", !isOther);
+      if (isOther) {
+        window.setTimeout(function() { byId("payCustomHow").focus(); }, 60);
+      }
+    }
+
+    async function submitPayBill() {
+      const button = byId("confirmPaidBtn");
+      const bill = state.selectedBill;
+      const how = byId("payHow").value;
+      const customHow = byId("payCustomHow").value.trim();
+      const exactAmount = Number(byId("payExactAmount").value);
+
+      if (!bill) {
+        alert("Select an expense first.");
+        return;
+      }
+
+      if (!Number.isFinite(exactAmount) || exactAmount <= 0) {
+        alert("Enter the exact amount paid.");
+        return;
+      }
+
+      if (how === "Other" && !customHow) {
+        alert("Enter the payment details for Other.");
+        byId("payCustomHow").focus();
+        return;
+      }
+
+      setButtonBusy(button, true, "Saving...");
+
+      try {
+        const data = await sendPost({
+          action: "payBill",
+          rowIndex: bill.rowIndex,
+          how: how,
+          customHow: customHow,
+          exactAmount: exactAmount
+        });
+        state.selectedBill = null;
+        closeModals();
+        renderBillsUI(data);
+      } catch (error) {
+        alert(error.message || String(error));
+      } finally {
+        setButtonBusy(button, false);
+      }
+    }
+
+    function renderShoppingUI(data) {
+      const body = byId("shoppingBody");
+      clearTableBody(body);
+      const items = data && Array.isArray(data.pendingItems) ? data.pendingItems : [];
+
+      if (items.length === 0) {
+        appendEmptyRow(body, 2, "Your grocery list is clear.");
+        return;
+      }
+
+      items.forEach(function(item) {
+        const row = document.createElement("tr");
+        row.className = "clickable-row";
+        appendCell(row, item[1]);
+        appendCell(row, item[2]);
+        attachDoubleTap(row, function() {
+          return buyItem(Number(item[0]), String(item[2] || ""), row);
+        });
+        body.appendChild(row);
+      });
+    }
+
+    function createGroceryInputRow() {
+      const row = document.createElement("div");
+      row.className = "shopping-input-row";
+
+      const itemInput = document.createElement("input");
+      itemInput.type = "text";
+      itemInput.className = "shop-what";
+      itemInput.autocomplete = "off";
+      itemInput.placeholder = "Item name";
+
+      const qtyInput = document.createElement("input");
+      qtyInput.type = "number";
+      qtyInput.className = "shop-qty";
+      qtyInput.min = "1";
+      qtyInput.step = "1";
+      qtyInput.inputMode = "numeric";
+      qtyInput.value = "1";
+      qtyInput.setAttribute("aria-label", "Quantity");
+
+      row.appendChild(itemInput);
+      row.appendChild(qtyInput);
+      byId("shoppingInputList").appendChild(row);
+      return row;
+    }
+
+    function openShoppingModal() {
+      byId("shoppingInputList").textContent = "";
+      const row = createGroceryInputRow();
+      openModal("shoppingModal");
+      window.setTimeout(function() { row.querySelector(".shop-what").focus(); }, 60);
+    }
+
+    function addMoreShoppingRow() {
+      const row = createGroceryInputRow();
+      window.setTimeout(function() { row.querySelector(".shop-what").focus(); }, 60);
+    }
+
+    async function submitShoppingItems() {
+      const button = byId("saveGroceriesBtn");
+      const items = [];
+
+      document.querySelectorAll(".shopping-input-row").forEach(function(row) {
+        const what = row.querySelector(".shop-what").value.trim();
+        const qty = Number(row.querySelector(".shop-qty").value || 1);
+        if (what) {
+          items.push({ what: what, qty: Number.isInteger(qty) && qty > 0 ? qty : 1 });
+        }
+      });
+
+      if (items.length === 0) {
+        alert("Add at least one grocery item.");
+        return;
+      }
+
+      setButtonBusy(button, true, "Adding...");
+
+      try {
+        const data = await sendPost({ action: "addShoppingItems", items: items });
+        closeModals();
+        renderShoppingUI(data);
+      } catch (error) {
+        alert(error.message || String(error));
+      } finally {
+        setButtonBusy(button, false);
+      }
+    }
+
+    async function buyItem(rowIndex, itemName, rowElement) {
+      rowElement.classList.add("is-saving");
+
+      try {
+        const data = await sendPost({
+          action: "buyShoppingItem",
+          rowIndex: rowIndex
+        });
+        renderShoppingUI(data);
+        state.lastBought = { rowIndex: rowIndex, itemName: itemName };
+        showUndoToast(itemName);
+      } catch (error) {
+        rowElement.classList.remove("is-saving");
+        alert(error.message || String(error));
+      }
+    }
+
+    function showUndoToast(itemName) {
+      if (state.toastTimer) window.clearTimeout(state.toastTimer);
+      byId("toastMessage").textContent = "Bought: " + itemName;
+      byId("toastNotification").classList.remove("hidden");
+
+      state.toastTimer = window.setTimeout(function() {
+        hideUndoToast(true);
+      }, 2500);
+    }
+
+    function hideUndoToast(clearItem) {
+      if (state.toastTimer) {
+        window.clearTimeout(state.toastTimer);
+        state.toastTimer = null;
+      }
+      byId("toastNotification").classList.add("hidden");
+      if (clearItem) state.lastBought = null;
+    }
+
+    async function undoBuyItem() {
+      const target = state.lastBought;
+      if (!target) return;
+
+      hideUndoToast(false);
+      state.lastBought = null;
+      const button = byId("undoBuyBtn");
+      button.disabled = true;
+
+      try {
+        const data = await sendPost({
+          action: "undoBuyShoppingItem",
+          rowIndex: target.rowIndex
+        });
+        renderShoppingUI(data);
+      } catch (error) {
+        alert(error.message || String(error));
+        await loadData();
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    function openHistoryDateModal() {
+      const today = localDateKey(new Date());
+      const start = shiftDateKey(today, -29);
+      byId("histStartDate").max = today;
+      byId("histEndDate").max = today;
+      byId("histStartDate").value = start;
+      byId("histEndDate").value = today;
+      openModal("historyDateModal");
+    }
+
+    function submitCustomHistory() {
+      const startDate = byId("histStartDate").value;
+      const endDate = byId("histEndDate").value;
+      const today = localDateKey(new Date());
+
+      if (!startDate || !endDate) {
+        alert("Select both dates.");
+        return;
+      }
+
+      if (startDate > endDate) {
+        alert("The From date cannot be after the To date.");
+        return;
+      }
+
+      if (endDate > today) {
+        alert("The To date cannot be in the future.");
+        return;
+      }
+
+      closeModals();
+      fetchGroceryHistory(null, startDate, endDate);
+    }
+
+    async function fetchGroceryHistory(days, startDate, endDate) {
+      const today = localDateKey(new Date());
+      const rangeDays = Number(days || 0);
+      const effectiveEnd = endDate || today;
+      const effectiveStart = startDate || shiftDateKey(effectiveEnd, -(Math.max(rangeDays, 1) - 1));
+
+      byId("historyTitle").textContent = formatOrdinalDate(effectiveStart) + " \u2013 " + formatOrdinalDate(effectiveEnd);
+      byId("historyListContainer").innerHTML = "<div class=\"loading-state\"><div><div class=\"spinner\"></div><div>Loading grocery history...</div></div></div>";
+      openModal("historyDisplayModal");
+
+      try {
+        const data = await apiGet({
+          action: "getGroceryHistory",
+          startDate: effectiveStart,
+          endDate: effectiveEnd,
+          _: Date.now()
+        });
+
+        const finalStart = data.startDate || effectiveStart;
+        const finalEnd = data.endDate || effectiveEnd;
+        byId("historyTitle").textContent = formatOrdinalDate(finalStart) + " \u2013 " + formatOrdinalDate(finalEnd);
+        renderHistoryUI(data.history || []);
+      } catch (error) {
+        byId("historyListContainer").textContent = "Unable to load history: " + (error.message || String(error));
+      }
+    }
+
+    function renderHistoryUI(historyItems) {
+      const container = byId("historyListContainer");
+      container.textContent = "";
+
+      if (!Array.isArray(historyItems) || historyItems.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "loading-state";
+        empty.textContent = "No items were bought in this date range.";
+        container.appendChild(empty);
+        return;
+      }
+
+      const wrap = document.createElement("div");
+      wrap.className = "table-wrap";
+      const table = document.createElement("table");
+      const head = document.createElement("thead");
+      const headRow = document.createElement("tr");
+      ["Date", "Qty", "Item"].forEach(function(label) {
+        const th = document.createElement("th");
+        th.textContent = label;
+        headRow.appendChild(th);
+      });
+      head.appendChild(headRow);
+      table.appendChild(head);
+
+      const body = document.createElement("tbody");
+      historyItems.forEach(function(item) {
+        const row = document.createElement("tr");
+        appendCell(row, formatOrdinalDate(item.dateKey));
+        appendCell(row, item.qty || 1);
+        appendCell(row, item.item || "");
+        body.appendChild(row);
+      });
+      table.appendChild(body);
+      wrap.appendChild(table);
+      container.appendChild(wrap);
+    }
+
+    function openModal(id) {
+      closeModals();
+      const modal = byId(id);
+      modal.classList.remove("hidden");
+      modal.setAttribute("aria-hidden", "false");
+      document.body.classList.add("modal-open");
+    }
+
+    function closeModals() {
+      document.querySelectorAll(".modal").forEach(function(modal) {
+        modal.classList.add("hidden");
+        modal.setAttribute("aria-hidden", "true");
+      });
+      document.body.classList.remove("modal-open");
+    }
+
+    function bindEvents() {
+      byId("accountSelect").addEventListener("change", resetView);
+      byId("checkBtn").addEventListener("click", loadData);
+      byId("topUpBtn").addEventListener("click", function() { activateForm("Top-Up"); });
+      byId("spendBtn").addEventListener("click", function() { activateForm("Spend"); });
+      byId("saveTransactionBtn").addEventListener("click", submitTransaction);
+      byId("cancelTransactionBtn").addEventListener("click", cancelAction);
+      byId("openAddExpenseBtn").addEventListener("click", openAddBillModal);
+      byId("saveExpenseBtn").addEventListener("click", submitAddBill);
+      byId("payHow").addEventListener("change", toggleCustomHow);
+      byId("confirmPaidBtn").addEventListener("click", submitPayBill);
+      byId("openGroceryBtn").addEventListener("click", openShoppingModal);
+      byId("addMoreGroceryBtn").addEventListener("click", addMoreShoppingRow);
+      byId("saveGroceriesBtn").addEventListener("click", submitShoppingItems);
+      byId("undoBuyBtn").addEventListener("click", undoBuyItem);
+      byId("history30Btn").addEventListener("click", function() { fetchGroceryHistory(30); });
+      byId("historyCalendarBtn").addEventListener("click", openHistoryDateModal);
+      byId("showCustomHistoryBtn").addEventListener("click", submitCustomHistory);
+      byId("closeHistoryBtn").addEventListener("click", closeModals);
+
+      document.querySelectorAll("[data-close-modal]").forEach(function(button) {
+        button.addEventListener("click", closeModals);
+      });
+
+      document.querySelectorAll(".modal").forEach(function(modal) {
+        modal.addEventListener("click", function(event) {
+          if (event.target === modal) closeModals();
+        });
+      });
+
+      document.addEventListener("keydown", function(event) {
+        if (event.key === "Escape") closeModals();
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", bindEvents);
+  </script>
+</body>
+</html>
