@@ -686,7 +686,7 @@
         <div class="card table-card">
           <div class="table-heading">
             <h3 class="section-title">Pending Expenses</h3>
-            <p class="section-subtitle">Double tap an expense to mark it as paid.</p>
+            <p class="section-subtitle">Soonest due date first. Double tap an expense to mark it as paid.</p>
           </div>
           <div class="table-wrap">
             <table class="compact-table">
@@ -1000,6 +1000,36 @@
       return day + suffix + " " + months[date.getMonth()] + " " + String(date.getFullYear()).slice(-2);
     }
 
+    function expenseDateTimestamp(value) {
+      if (value instanceof Date && !Number.isNaN(value.getTime())) {
+        return value.getTime();
+      }
+
+      const text = String(value || "").trim();
+      if (!text) return Number.NEGATIVE_INFINITY;
+
+      function timestampFromParts(year, month, day) {
+        const date = new Date(year, month - 1, day);
+        const isValid = date.getFullYear() === year &&
+          date.getMonth() === month - 1 &&
+          date.getDate() === day;
+        return isValid ? date.getTime() : Number.NEGATIVE_INFINITY;
+      }
+
+      let match = text.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s].*)?$/);
+      if (match) {
+        return timestampFromParts(Number(match[1]), Number(match[2]), Number(match[3]));
+      }
+
+      match = text.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})(?:\s.*)?$/);
+      if (match) {
+        return timestampFromParts(Number(match[3]), Number(match[2]), Number(match[1]));
+      }
+
+      const parsed = Date.parse(text);
+      return Number.isNaN(parsed) ? Number.NEGATIVE_INFINITY : parsed;
+    }
+
     function numberFromMoney(value) {
       if (typeof value === "number") return value;
       const cleaned = String(value || "").replace(/[^0-9,.-]/g, "").replace(/,/g, "");
@@ -1208,7 +1238,28 @@
       clearTableBody(pendingBody);
       clearTableBody(paidBody);
 
-      const pending = data && Array.isArray(data.pendingBills) ? data.pendingBills : [];
+      const pending = data && Array.isArray(data.pendingBills)
+        ? data.pendingBills.slice().sort(function(a, b) {
+            const dateA = expenseDateTimestamp(a[2]);
+            const dateB = expenseDateTimestamp(b[2]);
+            const invalidA = !Number.isFinite(dateA);
+            const invalidB = !Number.isFinite(dateB);
+
+            // Put blank or invalid dates at the bottom.
+            if (invalidA && invalidB) {
+              return Number(b[0] || 0) - Number(a[0] || 0);
+            }
+            if (invalidA) return 1;
+            if (invalidB) return -1;
+
+            // Soonest/nearest due date first.
+            if (dateA < dateB) return -1;
+            if (dateA > dateB) return 1;
+
+            // When dates match, show the row added most recently first.
+            return Number(b[0] || 0) - Number(a[0] || 0);
+          })
+        : [];
       const paid = data && Array.isArray(data.paidBills) ? data.paidBills : [];
 
       if (pending.length === 0) {
